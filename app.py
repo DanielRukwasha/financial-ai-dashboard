@@ -10,8 +10,8 @@ from charts.builder import (
     make_candlestick,
     make_multi_line
 )
+from ai.analyst import generate_market_summary
 
-# ── Configuration de la page ──────────────────────────────────
 st.set_page_config(
     page_title="Financial AI Dashboard",
     page_icon="📈",
@@ -19,7 +19,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── Sidebar ───────────────────────────────────────────────────
 with st.sidebar:
     st.title("📈 Financial AI")
     st.caption("Real-time market dashboard")
@@ -37,7 +36,6 @@ with st.sidebar:
     st.caption("Data: Yahoo Finance · FRED API")
     st.caption("Built by Daniel Rukwasha")
 
-# ── Cache pour éviter trop d'appels API ──────────────────────
 @st.cache_data(ttl=3600)
 def load_sp500():
     return get_sp500()
@@ -58,46 +56,49 @@ def load_bitcoin():
 def load_ethereum():
     return get_ethereum()
 
-# ══════════════════════════════════════════════════════════════
-# PAGE 1 — MARKET OVERVIEW
-# ══════════════════════════════════════════════════════════════
 if page == "🏠 Market Overview":
     st.title("🏠 Market Overview")
     st.caption("S&P 500 — Live data from Yahoo Finance")
 
-    # KPI cards
     sp500_price, sp500_change = get_sp500_info()
-    btc_price, btc_change     = get_crypto_info("BTC-USD")
-    eth_price, eth_change     = get_crypto_info("ETH-USD")
+    btc_price, btc_change = get_crypto_info("BTC-USD")
+    eth_price, eth_change = get_crypto_info("ETH-USD")
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("S&P 500 (SPY)", f"${sp500_price}",
-                  f"{sp500_change}%")
+        st.metric("S&P 500 (SPY)", f"${sp500_price}", f"{sp500_change}%")
     with col2:
-        st.metric("Bitcoin", f"${btc_price:,}",
-                  f"{btc_change}%")
+        st.metric("Bitcoin", f"${btc_price:,}", f"{btc_change}%")
     with col3:
-        st.metric("Ethereum", f"${eth_price:,}",
-                  f"{eth_change}%")
+        st.metric("Ethereum", f"${eth_price:,}", f"{eth_change}%")
 
     st.divider()
 
-    # Graphique S&P 500
+    with st.expander("🤖 AI Market Analysis", expanded=True):
+        with st.spinner("Generating AI analysis..."):
+            fed = load_fed_rate()
+            inf = load_inflation()
+            summary = generate_market_summary(
+                sp500_change,
+                inf.iloc[-1],
+                fed.iloc[-1],
+                btc_change,
+                eth_change
+            )
+            st.info(summary)
+
+    st.divider()
+
     with st.spinner("Loading S&P 500 data..."):
         sp500_data = load_sp500()
         fig = make_candlestick(sp500_data, "S&P 500 — Last 12 months")
         st.plotly_chart(fig, use_container_width=True)
 
-# ══════════════════════════════════════════════════════════════
-# PAGE 2 — MACRO ECONOMICS
-# ══════════════════════════════════════════════════════════════
 elif page == "🏦 Macro Economics":
     st.title("🏦 Macro Economics")
     st.caption("US Inflation & Fed Rate — Data from FRED API")
 
     col1, col2 = st.columns(2)
-
     with col1:
         with st.spinner("Loading inflation data..."):
             inflation = load_inflation()
@@ -120,7 +121,6 @@ elif page == "🏦 Macro Economics":
             )
             st.plotly_chart(fig, use_container_width=True)
 
-    # Dernières valeurs
     st.divider()
     st.subheader("Latest Values")
     col1, col2 = st.columns(2)
@@ -129,9 +129,6 @@ elif page == "🏦 Macro Economics":
     with col2:
         st.metric("Fed Rate", f"{fed_rate.iloc[-1]:.2f}%")
 
-# ══════════════════════════════════════════════════════════════
-# PAGE 3 — CRYPTO
-# ══════════════════════════════════════════════════════════════
 elif page == "₿ Crypto":
     st.title("₿ Crypto")
     st.caption("Bitcoin & Ethereum — Last 30 days")
@@ -170,18 +167,14 @@ elif page == "₿ Crypto":
             )
             st.plotly_chart(fig, use_container_width=True)
 
-# ══════════════════════════════════════════════════════════════
-# PAGE 4 — COMPARATOR
-# ══════════════════════════════════════════════════════════════
 elif page == "📊 Comparator":
     st.title("📊 Multi-Asset Comparator")
     st.caption("Compare performance across assets (normalized to 100)")
 
     with st.spinner("Loading data..."):
         sp500_data = load_sp500()
-        btc_data   = load_bitcoin()
-        eth_data   = load_ethereum()
-
+        btc_data = load_bitcoin()
+        eth_data = load_ethereum()
         fig = make_multi_line(
             [sp500_data, btc_data, eth_data],
             ["S&P 500", "Bitcoin", "Ethereum"],
