@@ -26,10 +26,10 @@ with st.sidebar:
     st.markdown("**Navigation**")
     page = st.radio(
         "",
-        ["🏠 Market Overview",
-         "🏦 Macro Economics",
-         "₿ Crypto",
-         "📊 Comparator"],
+        ["Market Overview",
+         "Macro Economics",
+         "Crypto",
+         "Comparator"],
         label_visibility="collapsed"
     )
     st.divider()
@@ -56,8 +56,8 @@ def load_bitcoin():
 def load_ethereum():
     return get_ethereum()
 
-if page == "🏠 Market Overview":
-    st.title("🏠 Market Overview")
+if page == "Market Overview":
+    st.header("📈 Market Overview", divider="blue")
     st.caption("S&P 500 — Live data from Yahoo Finance")
 
     sp500_price, sp500_change = get_sp500_info()
@@ -94,8 +94,8 @@ if page == "🏠 Market Overview":
         fig = make_candlestick(sp500_data, "S&P 500 — Last 12 months")
         st.plotly_chart(fig, use_container_width=True)
 
-elif page == "🏦 Macro Economics":
-    st.title("🏦 Macro Economics")
+elif page == "Macro Economics":
+    st.header("🏦 Macro Economics", divider="green")
     st.caption("US Inflation & Fed Rate — Data from FRED API")
 
     col1, col2 = st.columns(2)
@@ -129,8 +129,8 @@ elif page == "🏦 Macro Economics":
     with col2:
         st.metric("Fed Rate", f"{fed_rate.iloc[-1]:.2f}%")
 
-elif page == "₿ Crypto":
-    st.title("₿ Crypto")
+elif page == "Crypto":
+    st.header("₿ Crypto", divider="orange")
     st.caption("Bitcoin & Ethereum — Last 30 days")
 
     btc_price, btc_change = get_crypto_info("BTC-USD")
@@ -167,8 +167,8 @@ elif page == "₿ Crypto":
             )
             st.plotly_chart(fig, use_container_width=True)
 
-elif page == "📊 Comparator":
-    st.title("📊 Multi-Asset Comparator")
+elif page == "Comparator":
+    st.header("📊 Multi-Asset Comparator", divider="violet")
     st.caption("Compare performance across assets (normalized to 100)")
 
     with st.spinner("Loading data..."):
