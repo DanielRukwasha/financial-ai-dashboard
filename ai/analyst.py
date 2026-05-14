@@ -4,7 +4,19 @@ import os
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+from dotenv import load_dotenv
+import os
+import streamlit as st
+
+load_dotenv()
+
+def get_secret(key):
+    try:
+        return st.secrets[key]
+    except:
+        return os.getenv(key)
+
+client = Groq(api_key=get_secret("GROQ_API_KEY"))
 
 def generate_market_summary(sp500_change, inflation, fed_rate, btc_change, eth_change):
     """Génère un résumé IA des conditions du marché"""

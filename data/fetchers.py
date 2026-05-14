@@ -3,12 +3,20 @@ import pandas as pd
 from fredapi import Fred
 from dotenv import load_dotenv
 import os
+import streamlit as st
 
 load_dotenv()
 
+def get_secret(key):
+    """Lit les clés API depuis st.secrets (cloud) ou .env (local)"""
+    try:
+        return st.secrets[key]
+    except:
+        return os.getenv(key)
+
 # ── FRED API ──────────────────────────────────────────────────
 def get_fred():
-    return Fred(api_key=os.getenv("FRED_API_KEY"))
+    return Fred(api_key=get_secret("FRED_API_KEY"))
 
 def get_inflation():
     """Retourne l'inflation US (CPI) sur 3 ans"""
