@@ -2,16 +2,10 @@ import yfinance as yf
 import pandas as pd
 from fredapi import Fred
 from dotenv import load_dotenv
-from requests import Session
 import os
 import streamlit as st
 
 load_dotenv()
-
-session = Session()
-session.headers.update({
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-})
 
 def get_secret(key):
     try:
@@ -31,11 +25,11 @@ def get_fed_rate():
     return fred.get_series("FEDFUNDS", observation_start="2022-01-01")
 
 def get_sp500():
-    ticker = yf.Ticker("SPY", session=session)
+    ticker = yf.Ticker("SPY")
     return ticker.history(period="1y")
 
 def get_sp500_info():
-    ticker = yf.Ticker("SPY", session=session)
+    ticker = yf.Ticker("SPY")
     data = ticker.history(period="2d")
     if len(data) >= 2:
         yesterday = data["Close"].iloc[-2]
@@ -45,15 +39,15 @@ def get_sp500_info():
     return 0, 0
 
 def get_bitcoin():
-    ticker = yf.Ticker("BTC-USD", session=session)
+    ticker = yf.Ticker("BTC-USD")
     return ticker.history(period="30d")
 
 def get_ethereum():
-    ticker = yf.Ticker("ETH-USD", session=session)
+    ticker = yf.Ticker("ETH-USD")
     return ticker.history(period="30d")
 
 def get_crypto_info(symbol):
-    ticker = yf.Ticker(symbol, session=session)
+    ticker = yf.Ticker(symbol)
     data = ticker.history(period="2d")
     if len(data) >= 2:
         yesterday = data["Close"].iloc[-2]
