@@ -10,6 +10,14 @@ from charts.builder import (
     make_candlestick,
     make_multi_line
 )
+from valuation import render_valuation_page
+
+# In your sidebar/navigation section:
+page = st.sidebar.radio("Navigation", 
+    ["📈 Market Overview", "📊 Valuation", "🤖 AI Commentary"])
+
+if page == "📊 Valuation":
+    render_valuation_page()
 from ai.analyst import generate_market_summary
 
 st.set_page_config(
