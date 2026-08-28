@@ -34,7 +34,7 @@ Current Market Data:
 Write a brief market commentary focusing on the most significant observations."""
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=200,
         temperature=0.7,
@@ -57,7 +57,7 @@ Today's Change: {change:+.2f}%
 Be concise and factual."""
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=100,
         temperature=0.7,
