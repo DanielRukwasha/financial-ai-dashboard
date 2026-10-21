@@ -21,13 +21,16 @@ client = Groq(api_key=get_secret("GROQ_API_KEY"))
 def generate_market_summary(sp500_change, inflation, fed_rate, btc_change, eth_change):
     """Génère un résumé IA des conditions du marché"""
 
+    inflation_txt = f"{inflation:.1f}" if inflation is not None else "unavailable"
+    fed_rate_txt = f"{fed_rate:.2f}%" if fed_rate is not None else "unavailable"
+
     prompt = f"""You are a senior financial analyst. Based on the following real-time market data, 
 write a concise market summary in 3 sentences maximum. Be factual, professional, and insightful.
 
 Current Market Data:
 - S&P 500 today: {sp500_change:+.2f}%
-- US Inflation (CPI latest): {inflation:.1f}
-- Fed Funds Rate: {fed_rate:.2f}%
+- US Inflation (CPI latest): {inflation_txt}
+- Fed Funds Rate: {fed_rate_txt}
 - Bitcoin today: {btc_change:+.2f}%
 - Ethereum today: {eth_change:+.2f}%
 

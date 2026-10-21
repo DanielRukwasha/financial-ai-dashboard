@@ -50,6 +50,13 @@ def load_inflation():
 def load_fed_rate():
     return get_fed_rate()
 
+def try_load(loader):
+    """FRED can fail (e.g. maintenance page instead of XML) - don't crash the app."""
+    try:
+        return loader()
+    except Exception:
+        return None
+
 @st.cache_data(ttl=3600)
 def load_bitcoin():
     return get_bitcoin()
@@ -78,12 +85,12 @@ if page == "Market Overview":
 
     with st.expander("🤖 AI Market Analysis", expanded=True):
         with st.spinner("Generating AI analysis..."):
-            fed = load_fed_rate()
-            inf = load_inflation()
+            fed = try_load(load_fed_rate)
+            inf = try_load(load_inflation)
             summary = generate_market_summary(
                 sp500_change,
-                inf.iloc[-1],
-                fed.iloc[-1],
+                inf.iloc[-1] if inf is not None else None,
+                fed.iloc[-1] if fed is not None else None,
                 btc_change,
                 eth_change
             )
@@ -103,33 +110,39 @@ elif page == "Macro Economics":
     col1, col2 = st.columns(2)
     with col1:
         with st.spinner("Loading inflation data..."):
-            inflation = load_inflation()
-            fig = make_line_chart(
-                inflation,
-                "US Inflation (CPI)",
-                color="#EF4444",
-                y_label="CPI Index"
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            inflation = try_load(load_inflation)
+            if inflation is None:
+                st.warning("Inflation data is temporarily unavailable (FRED API).")
+            else:
+                fig = make_line_chart(
+                    inflation,
+                    "US Inflation (CPI)",
+                    color="#EF4444",
+                    y_label="CPI Index"
+                )
+                st.plotly_chart(fig, use_container_width=True)
 
     with col2:
         with st.spinner("Loading Fed rate data..."):
-            fed_rate = load_fed_rate()
-            fig = make_line_chart(
-                fed_rate,
-                "Fed Funds Rate (%)",
-                color="#F59E0B",
-                y_label="Rate %"
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            fed_rate = try_load(load_fed_rate)
+            if fed_rate is None:
+                st.warning("Fed rate data is temporarily unavailable (FRED API).")
+            else:
+                fig = make_line_chart(
+                    fed_rate,
+                    "Fed Funds Rate (%)",
+                    color="#F59E0B",
+                    y_label="Rate %"
+                )
+                st.plotly_chart(fig, use_container_width=True)
 
     st.divider()
     st.subheader("Latest Values")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Latest CPI", f"{inflation.iloc[-1]:.1f}")
+        st.metric("Latest CPI", f"{inflation.iloc[-1]:.1f}" if inflation is not None else "N/A")
     with col2:
-        st.metric("Fed Rate", f"{fed_rate.iloc[-1]:.2f}%")
+        st.metric("Fed Rate", f"{fed_rate.iloc[-1]:.2f}%" if fed_rate is not None else "N/A")
 
 elif page == "Crypto":
     st.header("₿ Crypto", divider="orange")
