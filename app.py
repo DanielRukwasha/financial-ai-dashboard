@@ -30,7 +30,7 @@ with st.sidebar:
         ["Market Overview",
          "Macro Economics",
          "Crypto",
-         "Comparator"
+         "Comparator",
          "Valuation"],
         label_visibility="collapsed"
     )
@@ -185,8 +185,6 @@ elif page == "Crypto":
 elif page == "Comparator":
     st.header("📊 Multi-Asset Comparator", divider="violet")
     st.caption("Compare performance across assets (normalized to 100)")
-elif page == "Valuation":
-    render_valuation_page()
 
     with st.spinner("Loading data..."):
         sp500_data = load_sp500()
@@ -200,4 +198,7 @@ elif page == "Valuation":
         st.plotly_chart(fig, use_container_width=True)
 
     st.info("📌 All assets normalized to 100 at start date for fair comparison.")
+
+elif page == "Valuation":
+    render_valuation_page()
     
